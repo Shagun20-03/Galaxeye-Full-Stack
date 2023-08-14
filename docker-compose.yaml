@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo
+    container_name: my_mongodb
+    environment:
+      - MONGO_INITDB_DATABASE=galaxeye
+    # ports:
+    #   - 27017:27017  
+    volumes:
+      - ./data:/data/db
+    restart: on-failure
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: my_frontend
+    environment:
+      - REACT_APP_BACKEND_API=http://localhost:5000/api/v1/tile
+    ports:
+      - 3000:3000
+    depends_on:
+      - backend    
+    restart: on-failure
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - 5000:5000  
+    environment:
+      - DATABASE_URI=mongodb://mongodb:27017/galaxeye  
+    depends_on:
+      - mongodb  
+    container_name: my_backend
+    restart: on-failure
